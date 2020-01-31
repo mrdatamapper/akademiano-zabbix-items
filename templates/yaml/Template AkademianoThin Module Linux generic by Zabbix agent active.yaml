@@ -1,0 +1,281 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/AkademinoThin
+    - name: Templates/Modules
+  templates:
+    template:
+      template: Template AkademianoThin Module Linux generic by Zabbix agent active
+      name: Template AkademianoThin Module Linux generic by Zabbix agent active
+      description: 'Template tooling version used: 0.34'
+      groups:
+        group:
+        - name: Templates/AkademinoThin
+        - name: Templates/Modules
+      applications:
+        application:
+        - name: General
+        - name: Inventory
+        - name: Security
+        - name: Status
+      items:
+        item:
+        - name: Maximum number of open file descriptors
+          type: ZABBIX_ACTIVE
+          key: kernel.maxfiles
+          delay: 1h
+          history: 7d
+          description: It could be increased by using sysctrl utility or modifying file /etc/sysctl.conf.
+          applications:
+            application:
+              name: General
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+          triggers:
+            trigger:
+              expression: '{last()}<{$KERNEL.MAXFILES.MIN}'
+              name: Configured max number of open filedescriptors is too low (< {$KERNEL.MAXFILES.MIN})
+              priority: INFO
+        - name: Maximum number of processes
+          type: ZABBIX_ACTIVE
+          key: kernel.maxproc
+          delay: 1h
+          history: 7d
+          description: It could be increased by using sysctrl utility or modifying file /etc/sysctl.conf.
+          applications:
+            application:
+              name: General
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+          triggers:
+            trigger:
+              expression: '{last()}<{$KERNEL.MAXPROC.MIN}'
+              name: Configured max number of processes is too low (< {$KERNEL.MAXPROC.MIN})
+              priority: INFO
+              dependencies:
+                dependency:
+                  name: Getting closer to process limit (over 80% used)
+                  expression: '{Template AkademianoThin Module Linux generic by Zabbix agent active:proc.num.last()}/{Template AkademianoThin Module Linux generic by Zabbix agent active:kernel.maxproc.last()}*100>80'
+        - name: Number of processes
+          type: ZABBIX_ACTIVE
+          key: proc.num
+          history: 7d
+          applications:
+            application:
+              name: General
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_FAST}'
+        - name: Number of running processes
+          type: ZABBIX_ACTIVE
+          key: proc.num[,,run]
+          history: 7d
+          applications:
+            application:
+              name: General
+        - name: System boot time
+          type: ZABBIX_ACTIVE
+          key: system.boottime
+          delay: 15m
+          history: 7d
+          units: unixtime
+          applications:
+            application:
+              name: General
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+        - name: System name
+          type: ZABBIX_ACTIVE
+          key: system.hostname
+          delay: 1h
+          history: 2w
+          trends: 0
+          value_type: CHAR
+          description: System host name.
+          inventory_link: NAME
+          applications:
+            application:
+              name: General
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+          triggers:
+            trigger:
+              expression: '{diff()}=1 and {strlen()}>0'
+              name: 'System name has changed (new name: {ITEM.VALUE})'
+              opdata: 'Previous: {ITEM.LASTVALUE}'
+              priority: INFO
+              description: System name has changed. Ack to close.
+              manual_close: 'YES'
+        - name: Operating system architecture
+          type: ZABBIX_ACTIVE
+          key: system.sw.arch
+          delay: 1h
+          history: 2w
+          trends: 0
+          value_type: CHAR
+          description: Operating system architecture of the host.
+          applications:
+            application:
+              name: Inventory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+        - name: Operating system
+          type: ZABBIX_ACTIVE
+          key: system.sw.os
+          delay: 1h
+          history: 2w
+          trends: 0
+          value_type: CHAR
+          inventory_link: OS
+          applications:
+            application:
+              name: Inventory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+          triggers:
+            trigger:
+              expression: '{diff()}=1 and {strlen()}>0'
+              name: Operating system description has changed
+              priority: INFO
+              description: Operating system description has changed. Possible reasons that system has been updated or replaced. Ack to close.
+              manual_close: 'YES'
+        - name: Software installed
+          type: ZABBIX_ACTIVE
+          key: system.sw.packages
+          delay: 1h
+          history: 2w
+          trends: 0
+          value_type: TEXT
+          applications:
+            application:
+              name: Inventory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+        - name: System description
+          type: ZABBIX_ACTIVE
+          key: system.uname
+          delay: 1h
+          history: 2w
+          trends: 0
+          value_type: CHAR
+          description: The information as normally returned by 'uname -a'.
+          applications:
+            application:
+              name: General
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+        - name: System uptime
+          type: ZABBIX_ACTIVE
+          key: system.uptime
+          delay: 5m
+          history: 2w
+          trends: 0
+          units: uptime
+          description: System uptime in 'N days, hh:mm:ss' format.
+          applications:
+            application:
+              name: Status
+          triggers:
+            trigger:
+              expression: '{last()}<10m'
+              name: '{HOST.NAME} has been restarted (uptime < 10m)'
+              priority: WARNING
+              description: The host uptime is less than 10 minutes
+              manual_close: 'YES'
+        - name: Number of logged in users
+          type: ZABBIX_ACTIVE
+          key: system.users.num
+          history: 7d
+          description: Number of users who are currently logged in.
+          applications:
+            application:
+              name: General
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+        - name: Checksum of /etc/passwd
+          type: ZABBIX_ACTIVE
+          key: vfs.file.cksum[/etc/passwd]
+          delay: 15m
+          history: 7d
+          trends: 0
+          value_type: CHAR
+          applications:
+            application:
+              name: Security
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_LONG}'
+          triggers:
+            trigger:
+              expression: '{diff()}>0'
+              name: /etc/passwd has been changed
+              priority: INFO
+              manual_close: 'YES'
+              dependencies:
+                dependency:
+                  name: Operating system description has changed
+                  expression: '{Template AkademianoThin Module Linux generic by Zabbix agent active:system.sw.os.diff()}=1 and {Template AkademianoThin Module Linux generic by Zabbix agent active:system.sw.os.strlen()}>0'
+      macros:
+        macro:
+        - macro: '{$KERNEL.MAXFILES.MIN}'
+          value: 256
+        - macro: '{$KERNEL.MAXPROC.MIN}'
+          value: 1024
+        - macro: '{$SYSTEM.FUZZYTIME.MAX}'
+          value: 60
+        - macro: '{$THROTTLE_HEARTBEAT_FAST}'
+          value: 5m
+        - macro: '{$THROTTLE_HEARTBEAT_LONG}'
+          value: 1d
+        - macro: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+          value: 1h
+        - macro: '{$THROTTLE_HEARTBEAT_SHORT}'
+          value: 15m
+  triggers:
+    trigger:
+      expression: '{Template AkademianoThin Module Linux generic by Zabbix agent active:proc.num.last()}/{Template AkademianoThin Module Linux generic by Zabbix agent active:kernel.maxproc.last()}*100>80'
+      name: Getting closer to process limit (over 80% used)
+      opdata: '{ITEM.LASTVALUE1} active, {ITEM.LASTVALUE2} limit.'
+      priority: WARNING
+  graphs:
+    graph:
+      name: Processes
+      graph_items:
+        graph_item:
+        - color: 1A7C11
+          item:
+            host: Template AkademianoThin Module Linux generic by Zabbix agent active
+            key: proc.num
+        - sortorder: 1
+          color: 2774A4
+          item:
+            host: Template AkademianoThin Module Linux generic by Zabbix agent active
+            key: proc.num[,,run]
+        - sortorder: 2
+          color: F63100
+          item:
+            host: Template AkademianoThin Module Linux generic by Zabbix agent active
+            key: kernel.maxproc
+...

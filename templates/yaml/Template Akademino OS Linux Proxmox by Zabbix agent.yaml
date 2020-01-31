@@ -1,0 +1,21 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/Akademiano
+    - name: Templates/Hypervisors
+    - name: Templates/Operating systems
+  templates:
+    template:
+      template: Template Akademino OS Linux Proxmox by Zabbix agent
+      name: Template Akademino OS Linux Proxmox by Zabbix agent
+      templates:
+        template:
+          name: Template Akademino OS Linux Host by Zabbix agent
+      groups:
+        group:
+        - name: Templates/Akademiano
+        - name: Templates/Hypervisors
+        - name: Templates/Operating systems
+...

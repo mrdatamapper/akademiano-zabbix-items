@@ -1,0 +1,25 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/AkademinoThin
+    - name: Templates/Operating systems
+  templates:
+    template:
+      template: Template AkademinoThin OS Linux by Zabbix agent
+      name: Template AkademinoThin OS Linux by Zabbix agent
+      templates:
+        template:
+        - name: Template Akademiano Module Linux network interfaces by Zabbix agent active
+        - name: Template AkademianoThin Module Linux filesystems by Zabbix agent active
+        - name: Template AkademianoThin Module Linux generic by Zabbix agent active
+        - name: Template AkademianoThin Module Linux memory by Zabbix agent active
+        - name: Template AkademinoThin  App SSH Service
+        - name: Template AkademinoThin Module Zabbix agent
+        - name: Template Module Linux CPU by Zabbix agent active
+      groups:
+        group:
+        - name: Templates/AkademinoThin
+        - name: Templates/Operating systems
+...

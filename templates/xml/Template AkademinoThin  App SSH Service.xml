@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+  <version>4.4</version>
+  <groups>
+    <group>
+      <name>Templates/AkademinoThin</name>
+    </group>
+    <group>
+      <name>Templates/Modules</name>
+    </group>
+  </groups>
+  <templates>
+    <template>
+      <template>Template AkademinoThin  App SSH Service</template>
+      <name>Template AkademinoThin  App SSH Service</name>
+      <groups>
+        <group>
+          <name>Templates/AkademinoThin</name>
+        </group>
+        <group>
+          <name>Templates/Modules</name>
+        </group>
+      </groups>
+      <applications>
+        <application>
+          <name>SSH service</name>
+        </application>
+      </applications>
+      <items>
+        <item>
+          <name>SSH service is running</name>
+          <type>ZABBIX_ACTIVE</type>
+          <key>net.tcp.service[ssh,{HOST.IP},{$SSH_PORT}]</key>
+          <history>1w</history>
+          <applications>
+            <application>
+              <name>SSH service</name>
+            </application>
+          </applications>
+          <valuemap>
+            <name>Service state</name>
+          </valuemap>
+          <preprocessing>
+            <step>
+              <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+              <params>{$THROTTLE_HEARTBEAT_SHORT}</params>
+            </step>
+          </preprocessing>
+          <triggers>
+            <trigger>
+              <expression>{max(#3)}=0</expression>
+              <name>SSH service is down on {HOST.NAME}</name>
+              <priority>AVERAGE</priority>
+            </trigger>
+          </triggers>
+        </item>
+      </items>
+      <macros>
+        <macro>
+          <macro>{$SSH_PORT}</macro>
+          <value>22</value>
+        </macro>
+        <macro>
+          <macro>{$THROTTLE_HEARTBEAT_SHORT}</macro>
+          <value>15m</value>
+        </macro>
+      </macros>
+    </template>
+  </templates>
+  <value_maps>
+    <value_map>
+      <name>Service state</name>
+      <mappings>
+        <mapping>
+          <value>0</value>
+          <newvalue>Down</newvalue>
+        </mapping>
+        <mapping>
+          <value>1</value>
+          <newvalue>Up</newvalue>
+        </mapping>
+      </mappings>
+    </value_map>
+  </value_maps>
+</zabbix_export>

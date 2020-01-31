@@ -1,0 +1,188 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/AkademinoThin
+    - name: Templates/Modules
+  templates:
+    template:
+      template: Template AkademianoThin Module Linux memory by Zabbix agent active
+      name: Template AkademianoThin Module Linux memory by Zabbix agent active
+      description: 'Template tooling version used: 0.34'
+      groups:
+        group:
+        - name: Templates/AkademinoThin
+        - name: Templates/Modules
+      applications:
+        application:
+          name: Memory
+      items:
+        item:
+        - name: Free swap space
+          type: ZABBIX_ACTIVE
+          key: system.swap.size[,free]
+          history: 7d
+          units: B
+          description: The free space of swap volume/file in bytes.
+          applications:
+            application:
+              name: Memory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_SHORT}'
+        - name: Free swap space in %
+          type: ZABBIX_ACTIVE
+          key: system.swap.size[,pfree]
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: The free space of swap volume/file in percent.
+          applications:
+            application:
+              name: Memory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_SHORT}'
+        - name: Total swap space
+          type: ZABBIX_ACTIVE
+          key: system.swap.size[,total]
+          history: 7d
+          units: B
+          description: The total space of swap volume/file in bytes.
+          applications:
+            application:
+              name: Memory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+        - name: Available memory
+          type: ZABBIX_ACTIVE
+          key: vm.memory.size[available]
+          history: 7d
+          units: B
+          description: 'Available memory, in Linux, available = free + buffers + cache. On other platforms calculation may vary. See also: https://www.zabbix.com/documentation/current/manual/appendix/items/vm.memory.size_params'
+          applications:
+            application:
+              name: Memory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_FAST}'
+        - name: Memory utilization
+          type: ZABBIX_ACTIVE
+          key: vm.memory.size[pavailable]
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: Memory used percentage is calculated as (100-pavailable)
+          applications:
+            application:
+              name: Memory
+          preprocessing:
+            step:
+            - type: JAVASCRIPT
+              params: return (100-value);
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_FAST}'
+          triggers:
+            trigger:
+              expression: '{min(5m)}>{$MEMORY.UTIL.MAX}'
+              name: High memory utilization ( >{$MEMORY.UTIL.MAX}% for 5m)
+              priority: AVERAGE
+              description: The system is running out of free memory.
+              dependencies:
+                dependency:
+                  name: Lack of available memory ( < {$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})
+                  expression: '{Template AkademianoThin Module Linux memory by Zabbix agent active:vm.memory.size[available].min(5m)}<{$MEMORY.AVAILABLE.MIN} and {Template AkademianoThin Module Linux memory by Zabbix agent active:vm.memory.size[total].last()}>0'
+        - name: Total memory
+          type: ZABBIX_ACTIVE
+          key: vm.memory.size[total]
+          history: 7d
+          units: B
+          description: Total memory in Bytes
+          applications:
+            application:
+              name: Memory
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+      macros:
+        macro:
+        - macro: '{$MEMORY.AVAILABLE.MIN}'
+          value: 20M
+          description: This macro is used as a threshold in memory available trigger.
+        - macro: '{$MEMORY.UTIL.MAX}'
+          value: 90
+          description: This macro is used as a threshold in memory utilization trigger.
+        - macro: '{$SWAP.PFREE.MIN.WARN}'
+          value: 50
+        - macro: '{$THROTTLE_HEARTBEAT_FAST}'
+          value: 5m
+        - macro: '{$THROTTLE_HEARTBEAT_LONG}'
+          value: 1d
+        - macro: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+          value: 1h
+        - macro: '{$THROTTLE_HEARTBEAT_SHORT}'
+          value: 15m
+  triggers:
+    trigger:
+    - expression: '{Template AkademianoThin Module Linux memory by Zabbix agent active:system.swap.size[,pfree].min(5m)}<{$SWAP.PFREE.MIN.WARN} and {Template AkademianoThin Module Linux memory by Zabbix agent active:system.swap.size[,total].last()}>0'
+      name: High swap space usage ( less than {$SWAP.PFREE.MIN.WARN}% free)
+      opdata: 'Free: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
+      priority: WARNING
+      description: This trigger is ignored, if there is no swap configured
+      dependencies:
+        dependency:
+        - name: High memory utilization ( >{$MEMORY.UTIL.MAX}% for 5m)
+          expression: '{Template AkademianoThin Module Linux memory by Zabbix agent active:vm.memory.size[pavailable].min(5m)}>{$MEMORY.UTIL.MAX}'
+        - name: Lack of available memory ( < {$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})
+          expression: '{Template AkademianoThin Module Linux memory by Zabbix agent active:vm.memory.size[available].min(5m)}<{$MEMORY.AVAILABLE.MIN} and {Template AkademianoThin Module Linux memory by Zabbix agent active:vm.memory.size[total].last()}>0'
+    - expression: '{Template AkademianoThin Module Linux memory by Zabbix agent active:vm.memory.size[available].min(5m)}<{$MEMORY.AVAILABLE.MIN} and {Template AkademianoThin Module Linux memory by Zabbix agent active:vm.memory.size[total].last()}>0'
+      name: Lack of available memory ( < {$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})
+      opdata: 'Available: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
+      priority: AVERAGE
+  graphs:
+    graph:
+    - name: Memory usage
+      ymin_type_1: FIXED
+      graph_items:
+        graph_item:
+        - drawtype: BOLD_LINE
+          color: 1A7C11
+          item:
+            host: Template AkademianoThin Module Linux memory by Zabbix agent active
+            key: vm.memory.size[total]
+        - sortorder: 1
+          drawtype: GRADIENT_LINE
+          color: 2774A4
+          item:
+            host: Template AkademianoThin Module Linux memory by Zabbix agent active
+            key: vm.memory.size[available]
+    - name: Memory utilization
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        graph_item:
+          drawtype: GRADIENT_LINE
+          color: 1A7C11
+          item:
+            host: Template AkademianoThin Module Linux memory by Zabbix agent active
+            key: vm.memory.size[pavailable]
+    - name: Swap usage
+      graph_items:
+        graph_item:
+        - color: 1A7C11
+          item:
+            host: Template AkademianoThin Module Linux memory by Zabbix agent active
+            key: system.swap.size[,free]
+        - sortorder: 1
+          color: 2774A4
+          item:
+            host: Template AkademianoThin Module Linux memory by Zabbix agent active
+            key: system.swap.size[,total]
+...

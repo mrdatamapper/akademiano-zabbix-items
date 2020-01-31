@@ -1,0 +1,54 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/AkademinoThin
+    - name: Templates/Modules
+  templates:
+    template:
+      template: Template AkademinoThin  App SSH Service
+      name: Template AkademinoThin  App SSH Service
+      groups:
+        group:
+        - name: Templates/AkademinoThin
+        - name: Templates/Modules
+      applications:
+        application:
+          name: SSH service
+      items:
+        item:
+          name: SSH service is running
+          type: ZABBIX_ACTIVE
+          key: net.tcp.service[ssh,{HOST.IP},{$SSH_PORT}]
+          history: 1w
+          applications:
+            application:
+              name: SSH service
+          valuemap:
+            name: Service state
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_SHORT}'
+          triggers:
+            trigger:
+              expression: '{max(#3)}=0'
+              name: SSH service is down on {HOST.NAME}
+              priority: AVERAGE
+      macros:
+        macro:
+        - macro: '{$SSH_PORT}'
+          value: 22
+        - macro: '{$THROTTLE_HEARTBEAT_SHORT}'
+          value: 15m
+  value_maps:
+    value_map:
+      name: Service state
+      mappings:
+        mapping:
+        - value: 0
+          newvalue: Down
+        - value: 1
+          newvalue: Up
+...

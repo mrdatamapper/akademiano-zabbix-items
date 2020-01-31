@@ -1,0 +1,20 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/Akademiano
+    - name: Templates/Operating systems
+  templates:
+    template:
+      template: Template Akademino OS Windows Host by Zabbix agent
+      name: Template Akademino OS Windows Host by Zabbix agent
+      templates:
+        template:
+        - name: Template Akademiano Smart Monitoring
+        - name: Template AkademinoThin OS Windows by Zabbix agent
+      groups:
+        group:
+        - name: Templates/Akademiano
+        - name: Templates/Operating systems
+...

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+  <version>4.4</version>
+  <groups>
+    <group>
+      <name>Templates/Akademiano</name>
+    </group>
+    <group>
+      <name>Templates/Operating systems</name>
+    </group>
+  </groups>
+  <templates>
+    <template>
+      <template>Template Akademino OS Linux Host by Zabbix agent</template>
+      <name>Template Akademino OS Linux Host by Zabbix agent</name>
+      <templates>
+        <template>
+          <name>Template Akademiano Module Linux block devices by Zabbix agent active</name>
+        </template>
+        <template>
+          <name>Template Akademiano Smart Monitoring</name>
+        </template>
+        <template>
+          <name>Template AkademinoThin OS Linux by Zabbix agent</name>
+        </template>
+      </templates>
+      <groups>
+        <group>
+          <name>Templates/Akademiano</name>
+        </group>
+        <group>
+          <name>Templates/Operating systems</name>
+        </group>
+      </groups>
+    </template>
+  </templates>
+</zabbix_export>

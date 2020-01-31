@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+  <version>4.4</version>
+  <groups>
+    <group>
+      <name>Templates</name>
+    </group>
+    <group>
+      <name>Templates/Orbis</name>
+    </group>
+    <group>
+      <name>Templates/Server hardware</name>
+    </group>
+  </groups>
+  <templates>
+    <template>
+      <template>Template Akademiano Openhardwaremonitor Orbis</template>
+      <name>Template Akademiano Openhardwaremonitor Orbis</name>
+      <groups>
+        <group>
+          <name>Templates</name>
+        </group>
+        <group>
+          <name>Templates/Orbis</name>
+        </group>
+        <group>
+          <name>Templates/Server hardware</name>
+        </group>
+      </groups>
+      <applications>
+        <application>
+          <name>GPU</name>
+        </application>
+      </applications>
+      <items>
+        <item>
+          <name>GPU Core Load</name>
+          <key>wmi.get["root\OpenHardwareMonitor","SELECT Value FROM Sensor WHERE InstanceId={$OHM.GPU.CORE.LOAD}"]</key>
+          <delay>3m</delay>
+          <history>7d</history>
+          <units>%</units>
+          <applications>
+            <application>
+              <name>GPU</name>
+            </application>
+          </applications>
+          <preprocessing>
+            <step>
+              <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+              <params>{$THROTTLE_HEARTBEAT_FAST}</params>
+            </step>
+          </preprocessing>
+        </item>
+        <item>
+          <name>GPU Fan</name>
+          <type>ZABBIX_ACTIVE</type>
+          <key>wmi.get["root\OpenHardwareMonitor","SELECT Value FROM Sensor WHERE InstanceId={$OHW.GPU.FAN}"]</key>
+          <delay>3m</delay>
+          <history>7d</history>
+          <applications>
+            <application>
+              <name>GPU</name>
+            </application>
+          </applications>
+          <preprocessing>
+            <step>
+              <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+              <params>{$THROTTLE_HEARTBEAT_FAST}</params>
+            </step>
+          </preprocessing>
+        </item>
+        <item>
+          <name>GPU Temp</name>
+          <type>ZABBIX_ACTIVE</type>
+          <key>wmi.get["root\OpenHardwareMonitor","SELECT Value FROM Sensor WHERE InstanceId={$OHW.GPU.TEMP}"]</key>
+          <delay>3m</delay>
+          <history>7d</history>
+          <applications>
+            <application>
+              <name>GPU</name>
+            </application>
+          </applications>
+          <preprocessing>
+            <step>
+              <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+              <params>{$THROTTLE_HEARTBEAT_FAST}</params>
+            </step>
+          </preprocessing>
+        </item>
+      </items>
+      <macros>
+        <macro>
+          <macro>{$THROTTLE_HEARTBEAT_FAST}</macro>
+          <value>5m</value>
+        </macro>
+        <macro>
+          <macro>{$THROTTLE_HEARTBEAT_LONG}</macro>
+          <value>1d</value>
+        </macro>
+        <macro>
+          <macro>{$THROTTLE_HEARTBEAT_MIDDLE}</macro>
+          <value>1h</value>
+        </macro>
+        <macro>
+          <macro>{$THROTTLE_HEARTBEAT_SHORT}</macro>
+          <value>15m</value>
+        </macro>
+      </macros>
+    </template>
+  </templates>
+</zabbix_export>

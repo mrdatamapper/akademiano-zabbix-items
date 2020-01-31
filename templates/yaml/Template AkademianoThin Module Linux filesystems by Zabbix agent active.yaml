@@ -1,0 +1,181 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/AkademinoThin
+    - name: Templates/Modules
+  templates:
+    template:
+      template: Template AkademianoThin Module Linux filesystems by Zabbix agent active
+      name: Template AkademianoThin Module Linux filesystems by Zabbix agent active
+      description: 'Template tooling version used: 0.34'
+      groups:
+        group:
+        - name: Templates/AkademinoThin
+        - name: Templates/Modules
+      applications:
+        application:
+          name: Filesystems
+      discovery_rules:
+        discovery_rule:
+          name: Mounted filesystem discovery
+          type: ZABBIX_ACTIVE
+          key: vfs.fs.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              condition:
+              - macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.MATCHES}'
+                formulaid: C
+              - macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+              - macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.MATCHES}'
+                formulaid: A
+              - macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          description: Discovery of file systems of different types.
+          item_prototypes:
+            item_prototype:
+            - name: '{#FSNAME}: Free inodes in %'
+              type: ZABBIX_ACTIVE
+              key: vfs.fs.inode[{#FSNAME},pfree]
+              delay: 10m
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              application_prototypes:
+                application_prototype:
+                  name: Filesystem {#FSNAME}
+              trigger_prototypes:
+                trigger_prototype:
+                - expression: '{min(5m)}<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                  name: '{#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  description: 'It may become impossible to write to disk if there are no index nodes left.
+
+                    As symptoms, ''No space left on device'' or ''Disk is full'' errors may be seen even though free space is available.'
+                - expression: '{min(5m)}<{$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}'
+                  name: '{#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: 'It may become impossible to write to disk if there are no index nodes left.
+
+                    As symptoms, ''No space left on device'' or ''Disk is full'' errors may be seen even though free space is available.'
+                  dependencies:
+                    dependency:
+                      name: '{#FSNAME}: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}%)'
+                      expression: '{Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.inode[{#FSNAME},pfree].min(5m)}<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+            - name: '{#FSNAME}: Space utilization'
+              type: ZABBIX_ACTIVE
+              key: vfs.fs.size[{#FSNAME},pused]
+              delay: 10m
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: Space utilization in % for {#FSNAME}
+              application_prototypes:
+                application_prototype:
+                  name: Filesystem {#FSNAME}
+            - name: '{#FSNAME}: Total space'
+              type: ZABBIX_ACTIVE
+              key: vfs.fs.size[{#FSNAME},total]
+              delay: 10m
+              history: 7d
+              units: B
+              description: Total space in Bytes
+              application_prototypes:
+                application_prototype:
+                  name: Filesystem {#FSNAME}
+            - name: '{#FSNAME}: Used space'
+              type: ZABBIX_ACTIVE
+              key: vfs.fs.size[{#FSNAME},used]
+              delay: 10m
+              history: 7d
+              units: B
+              description: Used storage in Bytes
+              application_prototypes:
+                application_prototype:
+                  name: Filesystem {#FSNAME}
+          trigger_prototypes:
+            trigger_prototype:
+            - expression: '{Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},pused].last()}>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"} and
+
+                (({Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},total].last()}-{Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},used].last()})<5G or {Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},pused].timeleft(1h,,100)}<1d)'
+              name: '{#FSNAME}: Disk space is critically low (used > {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%)'
+              opdata: 'Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})'
+              priority: AVERAGE
+              description: "Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.CRIT:\"{#FSNAME}\"}.\n Second condition should be one of the following:\n - The disk free space is less than 5G.\n - The disk will be full in less than 24 hours."
+            - expression: '{Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},pused].last()}>{$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"} and
+
+                (({Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},total].last()}-{Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},used].last()})<10G or {Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},pused].timeleft(1h,,100)}<1d)'
+              name: '{#FSNAME}: Disk space is low (used > {$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}%)'
+              opdata: 'Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})'
+              priority: WARNING
+              description: "Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.WARN:\"{#FSNAME}\"}.\n Second condition should be one of the following:\n - The disk free space is less than 10G.\n - The disk will be full in less than 24 hours."
+              dependencies:
+                dependency:
+                  name: '{#FSNAME}: Disk space is critically low (used > {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%)'
+                  expression: '{Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},pused].last()}>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"} and
+
+                    (({Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},total].last()}-{Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},used].last()})<5G or {Template AkademianoThin Module Linux filesystems by Zabbix agent active:vfs.fs.size[{#FSNAME},pused].timeleft(1h,,100)}<1d)'
+          graph_prototypes:
+            graph_prototype:
+              name: '{#FSNAME}: Disk space usage'
+              width: 600
+              height: 340
+              type: PIE
+              show_3d: 'YES'
+              graph_items:
+                graph_item:
+                - color: 969696
+                  calc_fnc: LAST
+                  type: GRAPH_SUM
+                  item:
+                    host: Template AkademianoThin Module Linux filesystems by Zabbix agent active
+                    key: vfs.fs.size[{#FSNAME},total]
+                - sortorder: 1
+                  color: C80000
+                  calc_fnc: LAST
+                  item:
+                    host: Template AkademianoThin Module Linux filesystems by Zabbix agent active
+                    key: vfs.fs.size[{#FSNAME},used]
+      macros:
+        macro:
+        - macro: '{$THROTTLE_HEARTBEAT_FAST}'
+          value: 5m
+        - macro: '{$THROTTLE_HEARTBEAT_LONG}'
+          value: 1d
+        - macro: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+          value: 1h
+        - macro: '{$THROTTLE_HEARTBEAT_SHORT}'
+          value: 15m
+        - macro: '{$VFS.FS.FSNAME.MATCHES}'
+          value: .+
+          description: This macro is used in filesystems discovery. Can be overridden on the host or linked template level
+        - macro: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+          value: ^(/dev|/sys|/run|/proc|.+/shm$)
+          description: This macro is used in filesystems discovery. Can be overridden on the host or linked template level
+        - macro: '{$VFS.FS.FSTYPE.MATCHES}'
+          value: ^(btrfs|ext2|ext3|ext4|reiser|xfs|ffs|ufs|jfs|jfs2|vxfs|hfs|apfs|refs|ntfs|fat32|zfs)$
+          description: This macro is used in filesystems discovery. Can be overridden on the host or linked template level
+        - macro: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+          value: ^\s$
+          description: This macro is used in filesystems discovery. Can be overridden on the host or linked template level
+        - macro: '{$VFS.FS.INODE.PFREE.MIN.CRIT}'
+          value: 10
+        - macro: '{$VFS.FS.INODE.PFREE.MIN.WARN}'
+          value: 20
+        - macro: '{$VFS.FS.PUSED.MAX.CRIT}'
+          value: 90
+        - macro: '{$VFS.FS.PUSED.MAX.WARN}'
+          value: 80
+...

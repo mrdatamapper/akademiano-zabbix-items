@@ -1,0 +1,69 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates
+    - name: Templates/Orbis
+    - name: Templates/Server hardware
+  templates:
+    template:
+      template: Template Akademiano Openhardwaremonitor Orbis
+      name: Template Akademiano Openhardwaremonitor Orbis
+      groups:
+        group:
+        - name: Templates
+        - name: Templates/Orbis
+        - name: Templates/Server hardware
+      applications:
+        application:
+          name: GPU
+      items:
+        item:
+        - name: GPU Core Load
+          key: wmi.get["root\OpenHardwareMonitor","SELECT Value FROM Sensor WHERE InstanceId={$OHM.GPU.CORE.LOAD}"]
+          delay: 3m
+          history: 7d
+          units: '%'
+          applications:
+            application:
+              name: GPU
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_FAST}'
+        - name: GPU Fan
+          type: ZABBIX_ACTIVE
+          key: wmi.get["root\OpenHardwareMonitor","SELECT Value FROM Sensor WHERE InstanceId={$OHW.GPU.FAN}"]
+          delay: 3m
+          history: 7d
+          applications:
+            application:
+              name: GPU
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_FAST}'
+        - name: GPU Temp
+          type: ZABBIX_ACTIVE
+          key: wmi.get["root\OpenHardwareMonitor","SELECT Value FROM Sensor WHERE InstanceId={$OHW.GPU.TEMP}"]
+          delay: 3m
+          history: 7d
+          applications:
+            application:
+              name: GPU
+          preprocessing:
+            step:
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              params: '{$THROTTLE_HEARTBEAT_FAST}'
+      macros:
+        macro:
+        - macro: '{$THROTTLE_HEARTBEAT_FAST}'
+          value: 5m
+        - macro: '{$THROTTLE_HEARTBEAT_LONG}'
+          value: 1d
+        - macro: '{$THROTTLE_HEARTBEAT_MIDDLE}'
+          value: 1h
+        - macro: '{$THROTTLE_HEARTBEAT_SHORT}'
+          value: 15m
+...

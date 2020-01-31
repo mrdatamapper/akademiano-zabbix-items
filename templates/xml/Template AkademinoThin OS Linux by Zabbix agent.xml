@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+  <version>4.4</version>
+  <groups>
+    <group>
+      <name>Templates/AkademinoThin</name>
+    </group>
+    <group>
+      <name>Templates/Operating systems</name>
+    </group>
+  </groups>
+  <templates>
+    <template>
+      <template>Template AkademinoThin OS Linux by Zabbix agent</template>
+      <name>Template AkademinoThin OS Linux by Zabbix agent</name>
+      <templates>
+        <template>
+          <name>Template Akademiano Module Linux network interfaces by Zabbix agent active</name>
+        </template>
+        <template>
+          <name>Template AkademianoThin Module Linux filesystems by Zabbix agent active</name>
+        </template>
+        <template>
+          <name>Template AkademianoThin Module Linux generic by Zabbix agent active</name>
+        </template>
+        <template>
+          <name>Template AkademianoThin Module Linux memory by Zabbix agent active</name>
+        </template>
+        <template>
+          <name>Template AkademinoThin  App SSH Service</name>
+        </template>
+        <template>
+          <name>Template AkademinoThin Module Zabbix agent</name>
+        </template>
+        <template>
+          <name>Template Module Linux CPU by Zabbix agent active</name>
+        </template>
+      </templates>
+      <groups>
+        <group>
+          <name>Templates/AkademinoThin</name>
+        </group>
+        <group>
+          <name>Templates/Operating systems</name>
+        </group>
+      </groups>
+    </template>
+  </templates>
+</zabbix_export>

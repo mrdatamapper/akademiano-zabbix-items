@@ -1,0 +1,21 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/Akademiano
+    - name: Templates/Operating systems
+  templates:
+    template:
+      template: Template Akademino OS Linux Host by Zabbix agent
+      name: Template Akademino OS Linux Host by Zabbix agent
+      templates:
+        template:
+        - name: Template Akademiano Module Linux block devices by Zabbix agent active
+        - name: Template Akademiano Smart Monitoring
+        - name: Template AkademinoThin OS Linux by Zabbix agent
+      groups:
+        group:
+        - name: Templates/Akademiano
+        - name: Templates/Operating systems
+...

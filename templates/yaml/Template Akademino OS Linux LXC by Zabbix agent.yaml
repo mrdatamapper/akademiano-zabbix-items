@@ -1,0 +1,21 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates
+    - name: Templates/Akademiano
+    - name: Templates/Operating systems
+  templates:
+    template:
+      template: Template Akademino OS Linux LXC by Zabbix agent
+      name: Template Akademino OS Linux LXC by Zabbix agent
+      templates:
+        template:
+          name: Template AkademinoThin OS Linux by Zabbix agent
+      groups:
+        group:
+        - name: Templates
+        - name: Templates/Akademiano
+        - name: Templates/Operating systems
+...

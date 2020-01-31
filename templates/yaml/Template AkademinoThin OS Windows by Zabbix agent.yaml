@@ -1,0 +1,19 @@
+---
+zabbix_export:
+  version: 4.4
+  groups:
+    group:
+    - name: Templates/AkademinoThin
+    - name: Templates/Operating systems
+  templates:
+    template:
+      template: Template AkademinoThin OS Windows by Zabbix agent
+      name: Template AkademinoThin OS Windows by Zabbix agent
+      templates:
+        template:
+          name: Template AkademinoThin Module Zabbix agent
+      groups:
+        group:
+        - name: Templates/AkademinoThin
+        - name: Templates/Operating systems
+...
